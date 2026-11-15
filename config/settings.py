@@ -110,16 +110,9 @@ CLOUDINARY_API_KEY = os.environ.get("CLOUDINARY_API_KEY", "")
 CLOUDINARY_API_SECRET = os.environ.get("CLOUDINARY_API_SECRET", "")
 CLOUDINARY_FOLDER = os.environ.get("CLOUDINARY_FOLDER", "covepa/mantenciones")
 CLOUDINARY_ENABLED = bool(CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET)
-
-if CLOUDINARY_ENABLED:
-    # django-cloudinary-storage debe ir antes de django.contrib.staticfiles.
-    INSTALLED_APPS.insert(INSTALLED_APPS.index("django.contrib.staticfiles"), "cloudinary_storage")
-    CLOUDINARY_STORAGE = {
-        "CLOUD_NAME": CLOUDINARY_CLOUD_NAME,
-        "API_KEY": CLOUDINARY_API_KEY,
-        "API_SECRET": CLOUDINARY_API_SECRET,
-        "SECURE": True,
-    }
+# Las fotos y videos NO pasan por Django: el celular los sube directo a Cloudinary con una firma del
+# servidor (core/cloudinary_service.py usa el SDK "cloudinary"). Por eso no se usa
+# django-cloudinary-storage (además, es incompatible con Django 5.1+ y rompe collectstatic).
 
 AUTH_USER_MODEL = "cuentas.Usuario"
 AUTHENTICATION_BACKENDS = ["cuentas.backends.CorreoBackend"]
@@ -223,13 +216,7 @@ else:
     _static_backend = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 STORAGES = {
-    "default": {
-        "BACKEND": (
-            "cloudinary_storage.storage.MediaCloudinaryStorage"
-            if CLOUDINARY_ENABLED
-            else "django.core.files.storage.FileSystemStorage"
-        )
-    },
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {"BACKEND": _static_backend},
 }
 

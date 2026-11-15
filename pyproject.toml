@@ -12,7 +12,6 @@ dependencies = [
     "pymongo>=4.8",
     "dnspython>=2.6",
     "cloudinary>=1.41",
-    "django-cloudinary-storage>=0.3.0",
     "whitenoise>=6.7",
     "pyotp>=2.9",
     "segno>=1.6",
