@@ -14,7 +14,6 @@ import sys
 from pathlib import Path
 
 import dj_database_url
-from django.core.exceptions import ImproperlyConfigured
 
 try:  # carga .env en desarrollo; en Vercel las variables ya vienen en el entorno
     from dotenv import load_dotenv
@@ -42,12 +41,16 @@ TESTING = "test" in sys.argv
 BUILD = "collectstatic" in sys.argv  # Vercel ejecuta collectstatic durante el build
 
 # --------------------------------------------------------------------------- seguridad
+# Variables obligatorias en producción que no están definidas. Importar la configuración NO falla
+# (Vercel ejecuta manage.py para detectar el proyecto), pero config/wsgi.py y config/asgi.py se
+# niegan a arrancar el servidor mientras esta lista no esté vacía.
+FALTAN_VARIABLES: list[str] = []
+
 SECRET_KEY = os.environ.get("SECRET_KEY", "")
 if not SECRET_KEY:
-    if DEBUG or TESTING or BUILD:
-        SECRET_KEY = "inseguro-solo-para-desarrollo-no-usar-en-produccion"
-    else:
-        raise ImproperlyConfigured("Falta la variable de entorno SECRET_KEY.")
+    SECRET_KEY = "inseguro-solo-para-desarrollo-no-usar-en-produccion"  # noqa: S105
+    if not (DEBUG or TESTING or BUILD):
+        FALTAN_VARIABLES.append("SECRET_KEY")
 
 ALLOWED_HOSTS = env_lista("ALLOWED_HOSTS", ".vercel.app,localhost,127.0.0.1,testserver")
 CSRF_TRUSTED_ORIGINS = env_lista("CSRF_TRUSTED_ORIGINS", "https://*.vercel.app")
@@ -172,9 +175,9 @@ def _configurar_base_relacional() -> dict:
         config["DISABLE_SERVER_SIDE_CURSORS"] = True
         config.setdefault("OPTIONS", {}).setdefault("sslmode", "require")
         return config
-    if DEBUG or TESTING or BUILD:
-        return {"ENGINE": "django.db.backends.sqlite3", "NAME": BASE_DIR / "db.sqlite3"}
-    raise ImproperlyConfigured("Falta DATABASE_URL (cadena de conexión de Neon).")
+    if not (DEBUG or TESTING or BUILD):
+        FALTAN_VARIABLES.append("DATABASE_URL")
+    return {"ENGINE": "django.db.backends.sqlite3", "NAME": BASE_DIR / "db.sqlite3"}
 
 
 DATABASES = {"default": _configurar_base_relacional()}

@@ -60,6 +60,11 @@ Copia *Cloud name*, *API key* y *API secret* del panel. Las fotos y los videos s
 3. Despliega. Revisa `https://TU-DOMINIO/salud/`: debe responder `{"estado": "ok"}` con las dos bases conectadas.
 4. `CRON_SECRET`: cualquier texto largo. Vercel lo envía en el cron diario (`/cron/vencimientos/`, 11:00 UTC) que genera los avisos de mantenciones por vencer. El plan Hobby permite un cron por día.
 
+**Si el despliegue falla:**
+- `DJANGO_SETTINGS_FAILED` / `No module named 'django'`: Vercel instala desde `pyproject.toml` (tiene prioridad sobre `requirements.txt`). Por eso las dependencias están declaradas en ambos archivos; si agregas una librería, agrégala en los dos (la prueba `core/tests/test_dependencias.py` avisa si se desalinean).
+- `"tool.vercel.entrypoint" ... no matching module file`: Vercel no encuentra `config/wsgi.py`. El repositorio debe tener `manage.py` y `config/` en la raíz (o indica la carpeta en *Settings → General → Root Directory*).
+- `Faltan variables de entorno obligatorias`: define `SECRET_KEY` y `DATABASE_URL` (y el resto de `.env.example`) en *Settings → Environment Variables* y vuelve a desplegar.
+
 ## 3. Pruebas
 
 ```bash

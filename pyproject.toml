@@ -3,6 +3,25 @@ name = "covepa-mantenciones"
 version = "0.3.0"
 description = "Sistema de Gestión de Inventario y Mantenciones de Equipos - COVEPA SpA (piloto Fresia)"
 requires-python = ">=3.12"
+# Vercel instala desde pyproject.toml (tiene prioridad sobre requirements.txt).
+# Mantén esta lista igual a requirements.txt (hay una prueba que lo verifica).
+dependencies = [
+    "Django>=5.2,<5.3",
+    "psycopg[binary]>=3.2",
+    "dj-database-url>=2.2",
+    "pymongo>=4.8",
+    "dnspython>=2.6",
+    "cloudinary>=1.41",
+    "django-cloudinary-storage>=0.3.0",
+    "whitenoise>=6.7",
+    "pyotp>=2.9",
+    "segno>=1.6",
+    "cryptography>=43.0",
+    "python-dotenv>=1.0",
+]
+
+[tool.uv]
+package = false  # es una aplicación, no una librería: solo se instalan las dependencias
 
 [tool.vercel]
 entrypoint = "config.wsgi:application"
