@@ -1,0 +1,26 @@
+[project]
+name = "covepa-mantenciones"
+version = "0.3.0"
+description = "Sistema de Gestión de Inventario y Mantenciones de Equipos - COVEPA SpA (piloto Fresia)"
+requires-python = ">=3.12"
+
+[tool.vercel]
+entrypoint = "config.wsgi:application"
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+extend-exclude = ["migrations", "staticfiles"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "S", "DJ"]
+ignore = ["S101", "S311"]
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/*" = ["S", "B"]
+"tests/*" = ["S", "B"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+# Pruebas puras (sin Django): pytest core/tests. Las pruebas con base de datos se corren con: python manage.py test
+python_files = ["test_*.py"]

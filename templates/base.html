@@ -1,0 +1,59 @@
+{% load static %}<!doctype html>
+<html lang="es-CL">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1E1E1A" media="(prefers-color-scheme: dark)">
+  <title>{% block titulo %}COVEPA Mantenciones{% endblock %}</title>
+  <link rel="manifest" href="{% url 'manifest' %}">
+  <link rel="icon" href="{% static 'img/favicon.png' %}">
+  <link rel="apple-touch-icon" href="{% static 'img/icon-192.png' %}">
+  <script src="{% static 'js/tema.js' %}"></script>
+  <link rel="stylesheet" href="{% static 'css/covepa.css' %}">
+  {% block head %}{% endblock %}
+</head>
+<body
+  data-url-sesion="{% url 'api:sesion' %}"
+  data-url-paquete="{% url 'api:paquete' %}"
+  data-url-firma="{% url 'api:firma' %}"
+  data-url-sincronizar="{% url 'api:sincronizar' %}"
+  data-url-login="{% url 'cuentas:login' %}"
+  data-url-offline="{% url 'offline' %}"
+  data-es-tecnico="{% if es_tecnico %}1{% else %}0{% endif %}"
+  data-usuario-id="{{ user.pk|default:'' }}">
+{% include "partials/iconos.html" %}
+<a class="solo-lectores" href="#contenido">Saltar al contenido</a>
+
+<header class="cabecera">
+  <div class="cabecera__fila">
+    <a href="{% url 'inicio' %}" aria-label="COVEPA, ir al inicio"><img class="cabecera__logo" src="{% static 'img/logo-covepa.png' %}" alt="COVEPA" width="65" height="36"></a>
+    <nav class="nav-inferior cabecera__menu" aria-label="Principal">{% include "partials/nav.html" %}</nav>
+    <span class="cabecera__espacio"></span>
+    <button class="cabecera__boton" type="button" data-alternar-tema hidden aria-label="Cambiar tema"><svg class="tema-luna" aria-hidden="true"><use href="#i-luna"/></svg><svg class="tema-sol" aria-hidden="true"><use href="#i-sol"/></svg></button>
+    <a class="cabecera__boton" href="{% url 'notificaciones:lista' %}" aria-label="Avisos{% if avisos_sin_leer %}, {{ avisos_sin_leer }} sin leer{% endif %}">
+      <svg aria-hidden="true"><use href="#i-campana"/></svg>
+      {% if avisos_sin_leer %}<span class="insignia" aria-hidden="true">{{ avisos_sin_leer }}</span>{% endif %}
+    </a>
+    <a class="cabecera__boton" href="{% url 'cuentas:perfil' %}" aria-label="Mi perfil"><svg aria-hidden="true"><use href="#i-usuario"/></svg></a>
+  </div>
+  <div class="franja" aria-hidden="true"></div>
+</header>
+
+<div class="estado-conexion" id="estado-conexion" role="status" aria-live="polite">
+  Sin conexión. Los formularios se guardan en este dispositivo y se envían cuando vuelva la señal.
+</div>
+
+<main class="contenedor {% block ancho %}{% endblock %}" id="contenido">
+  {% include "partials/mensajes.html" %}
+  {% block contenido %}{% endblock %}
+</main>
+
+{% if nav_items %}
+<nav class="nav-inferior" id="nav-movil" aria-label="Principal">{% include "partials/nav.html" %}</nav>
+{% endif %}
+
+<script src="{% static 'js/app.js' %}" defer></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

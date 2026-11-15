@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load static %}
+{% block titulo %}Plantilla · COVEPA{% endblock %}
+{% block ancho %}contenedor--ancho{% endblock %}
+{% block contenido %}
+<p class="migas"><a href="{% url 'mantenciones:plantillas' %}">Plantillas</a></p>
+<div class="titulo-pagina"><h1>{% if plantilla %}Editar {{ plantilla.nombre }}{% else %}Nueva plantilla{% endif %}</h1></div>
+
+<form method="post" class="formulario" id="form-plantilla" novalidate>
+  {% csrf_token %}
+  {{ form.non_field_errors }}
+  <div class="fila-campos">
+    {% for campo in form.visible_fields %}{% include "partials/campo.html" %}{% endfor %}
+  </div>
+  {{ form.campos_json }}{{ form.campos_json.errors }}
+
+  <h2 style="margin-bottom:0">Campos del formulario</h2>
+  <p class="ayuda">Cada cambio en los campos publica una versión nueva. Los registros ya completados conservan la versión que respondieron.</p>
+  <div class="constructor-campos" id="constructor"></div>
+  <ul class="errorlist" id="errores-constructor" role="alert" hidden></ul>
+  <div class="acciones" style="margin-top:0"><button class="boton boton--secundario" type="button" id="agregar-campo">Agregar campo</button></div>
+  {{ campos_iniciales|json_script:"campos-iniciales" }}
+
+  <div class="acciones">
+    <button class="boton" type="submit">Guardar plantilla</button>
+    <a class="boton boton--secundario" href="{% url 'mantenciones:plantillas' %}">Cancelar</a>
+  </div>
+</form>
+
+{% if versiones %}
+<h2>Versiones publicadas</h2>
+<div class="tabla-envoltura"><table class="tabla">
+  <thead><tr><th>Versión</th><th>Publicada</th><th>Campos</th></tr></thead>
+  <tbody>{% for v in versiones %}<tr><td>v{{ v.numero }}</td><td>{{ v.fecha|date:"d/m/Y H:i" }}</td><td>{{ v.campos|length }}</td></tr>{% endfor %}</tbody>
+</table></div>
+{% endif %}
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/plantilla_editor.js' %}" defer></script>{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load covepa %}
+{% block titulo %}Panel · COVEPA{% endblock %}
+{% block ancho %}contenedor--ancho{% endblock %}
+{% block contenido %}
+<div class="titulo-pagina"><h1>Panel</h1><span class="item__meta">{{ hoy|date:"l j \d\e F" }}</span></div>
+
+<div class="indicadores">
+  <div class="indicador"><div class="indicador__valor">{{ total_equipos }}</div><div class="indicador__texto">equipos en servicio{% if en_mantencion %} ({{ en_mantencion }} en mantención){% endif %}</div></div>
+  <div class="indicador{% if total_vencidos %} indicador--vencido{% endif %}"><div class="indicador__valor">{{ total_vencidos }}</div><div class="indicador__texto">mantenciones vencidas</div></div>
+  <div class="indicador"><div class="indicador__valor">{{ total_por_aprobar }}</div><div class="indicador__texto">tickets por aprobar</div></div>
+  <div class="indicador"><div class="indicador__valor">{{ mantenciones_30d }}</div><div class="indicador__texto">mantenciones en 30 días</div></div>
+</div>
+
+<div style="display:grid;gap:8px 28px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
+<section>
+  <h2 style="margin-top:0">Tickets por aprobar</h2>
+  {% if por_aprobar %}<ul class="lista">{% for t in por_aprobar %}
+    <li><a class="item item--alerta" href="{% url 'tickets:detalle' t.pk %}"><span class="item__titulo">{{ t.numero }}{% if t.equipo %} · <span class="codigo">{{ t.equipo.codigo }}</span>{% endif %}</span><span>{{ t.descripcion|truncatechars:90 }}</span></a></li>
+  {% endfor %}</ul>{% else %}<p class="item__meta">No hay tickets esperando tu decisión.</p>{% endif %}
+
+  <h2>Trabajos por cerrar</h2>
+  {% if por_cerrar %}<ul class="lista">{% for t in por_cerrar %}
+    <li><a class="item item--ok" href="{% url 'tickets:detalle' t.pk %}"><span class="item__titulo">{{ t.numero }}{% if t.equipo %} · <span class="codigo">{{ t.equipo.codigo }}</span>{% endif %}</span><span class="item__meta">Realizado: revisa y cierra</span></a></li>
+  {% endfor %}</ul>{% else %}<p class="item__meta">No hay trabajos esperando revisión.</p>{% endif %}
+</section>
+
+<section>
+  <h2 style="margin-top:0">Mantenciones vencidas</h2>
+  {% if vencidos %}<ul class="lista">{% for p in vencidos %}
+    <li><a class="item item--vencido" href="{% url 'inventario:detalle' p.equipo.pk %}"><span class="item__titulo">{{ p.actividad }} · <span class="codigo">{{ p.equipo.codigo }}</span></span><span class="item__meta">{{ p.dias_para_vencer|texto_dias }}</span></a></li>
+  {% endfor %}</ul>{% else %}<p class="item__meta">No hay mantenciones vencidas.</p>{% endif %}
+
+  <h2>Próximas mantenciones</h2>
+  {% if proximos %}<ul class="lista">{% for p in proximos %}
+    <li><a class="item item--{{ p.dias_para_vencer|tono_dias }}" href="{% url 'inventario:detalle' p.equipo.pk %}"><span class="item__titulo">{{ p.actividad }} · <span class="codigo">{{ p.equipo.codigo }}</span></span><span class="item__meta">{{ p.dias_para_vencer|texto_dias }}</span></a></li>
+  {% endfor %}</ul>{% else %}<p class="item__meta">Nada programado para los próximos 7 días.</p>{% endif %}
+</section>
+</div>
+{% endblock %}

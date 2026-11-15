@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load static %}
+{% block titulo %}Registrar mantención · COVEPA{% endblock %}
+{% block contenido %}
+<p class="migas"><a href="{% url 'mantenciones:inicio' %}">Inicio</a></p>
+<div class="titulo-pagina"><h1>Registrar mantención</h1></div>
+
+<div class="panel-sync" id="panel-sync" hidden>
+  <div class="panel-sync__texto" id="texto-sync" aria-live="polite"></div>
+  <button class="boton boton--amarillo boton--chico" type="button" id="boton-sync">Enviar ahora</button>
+</div>
+
+<noscript><p class="mensaje mensaje--warning">Esta pantalla necesita JavaScript para funcionar sin conexión.</p></noscript>
+
+<form id="form-mantencion" class="formulario" novalidate hidden>
+  <div class="grupo">
+    <label for="sel-equipo">Equipo</label>
+    <select class="campo" id="sel-equipo" required></select>
+  </div>
+  <div class="grupo" id="grupo-plantilla">
+    <label for="sel-plantilla">Formulario</label>
+    <select class="campo" id="sel-plantilla" required></select>
+  </div>
+  <p class="ayuda" id="info-automatica"></p>
+  <div id="campos-dinamicos" class="formulario"></div>
+  <ul class="errorlist" id="errores-form" role="alert" hidden></ul>
+  <button class="boton boton--bloque" type="submit" id="boton-guardar">Guardar mantención</button>
+</form>
+<div class="vacio" id="sin-datos" hidden><strong>Todavía no hay datos en este dispositivo</strong>Conéctate a internet una vez para descargar tus equipos y formularios.</div>
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/db.js' %}" defer></script><script src="{% static 'js/sync.js' %}" defer></script><script src="{% static 'js/registrar.js' %}" defer></script>{% endblock %}

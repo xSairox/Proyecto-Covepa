@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block titulo %}{{ titulo }} · COVEPA{% endblock %}
+{% block contenido %}
+<div class="titulo-pagina"><h1>{{ titulo }}</h1></div>
+<form method="post" class="formulario" novalidate>
+  {% csrf_token %}
+  {% include "partials/formulario_campos.html" %}
+  {% if not usuario_editado %}<p class="ayuda">La persona recibirá un enlace de un solo uso, válido por 24 horas, para definir su contraseña. Si el correo no llega, el enlace se muestra aquí al crear el usuario.</p>{% endif %}
+  <div class="acciones">
+    <button class="boton" type="submit">{% if usuario_editado %}Guardar cambios{% else %}Crear usuario{% endif %}</button>
+    <a class="boton boton--secundario" href="{% url 'cuentas:usuarios' %}">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

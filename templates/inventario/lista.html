@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load covepa %}
+{% block titulo %}Equipos · COVEPA{% endblock %}
+{% block contenido %}
+<div class="titulo-pagina">
+  <h1>Equipos</h1>
+  {% if perfil_codigo == "jefatura" %}<a class="boton" href="{% url 'inventario:nuevo' %}">Registrar equipo</a>{% endif %}
+</div>
+<form class="filtros" method="get">
+  <div><label for="q">Buscar</label><input class="campo" id="q" name="q" value="{{ filtros.q }}" placeholder="Código, nombre o marca"></div>
+  <div><label for="categoria">Categoría</label>
+    <select class="campo" id="categoria" name="categoria"><option value="">Todas</option>
+      {% for c in categorias %}<option value="{{ c.pk }}"{% if filtros.categoria == c.pk|stringformat:"s" %} selected{% endif %}>{{ c.nombre }}</option>{% endfor %}
+    </select></div>
+  <div><label for="estado">Estado</label>
+    <select class="campo" id="estado" name="estado">
+      <option value="">En servicio</option>
+      <option value="Activo"{% if filtros.estado == "Activo" %} selected{% endif %}>Activo</option>
+      <option value="En mantención"{% if filtros.estado == "En mantención" %} selected{% endif %}>En mantención</option>
+      <option value="Baja"{% if filtros.estado == "Baja" %} selected{% endif %}>Dado de baja</option>
+      <option value="todos"{% if filtros.estado == "todos" %} selected{% endif %}>Todos</option>
+    </select></div>
+  <button class="boton boton--secundario" type="submit">Filtrar</button>
+</form>
+
+{% if equipos %}
+<ul class="lista">
+  {% for e in equipos %}
+  <li><a class="item item--{{ e.estado|tono_equipo }}" href="{% url 'inventario:detalle' e.pk %}">
+    <span class="item__titulo"><span class="codigo">{{ e.codigo }}</span> {{ e.nombre }}</span>
+    <span class="item__meta">{{ e.categoria }} · {{ e.sucursal }}{% if e.ubicacion %} · {{ e.ubicacion }}{% endif %}</span>
+    <span class="item__lado"><span class="chip chip--{{ e.estado|tono_equipo }}">{{ e.estado }}</span></span>
+  </a></li>
+  {% endfor %}
+</ul>
+{% include "partials/paginacion.html" %}
+{% else %}
+<div class="vacio"><strong>No hay equipos para mostrar</strong>{% if perfil_codigo == "tecnico_externo" %}Aún no tienes equipos asignados. Pídele a la jefatura que te los asigne.{% else %}Cambia los filtros o registra un equipo nuevo.{% endif %}</div>
+{% endif %}
+{% endblock %}

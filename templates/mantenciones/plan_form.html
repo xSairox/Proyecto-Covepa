@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block titulo %}Plan de mantención · COVEPA{% endblock %}
+{% block contenido %}
+<p class="migas"><a href="{% url 'mantenciones:planes' %}">Planes de mantención</a></p>
+<div class="titulo-pagina"><h1>{% if plan %}Editar plan{% else %}Nuevo plan{% endif %}</h1></div>
+<form method="post" class="formulario" novalidate>
+  {% csrf_token %}
+  {% include "partials/formulario_campos.html" %}
+  <p class="ayuda">La plantilla debe ser de la misma categoría que el equipo. La primera mantención vence el día en que se crea el plan.</p>
+  <div class="acciones">
+    <button class="boton" type="submit">Guardar plan</button>
+    <a class="boton boton--secundario" href="{% url 'mantenciones:planes' %}">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

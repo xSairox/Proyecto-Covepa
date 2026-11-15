@@ -1,0 +1,7 @@
+{% extends "base_ingreso.html" %}
+{% block titulo %}Sin acceso · COVEPA{% endblock %}
+{% block contenido %}
+<h1>No tienes acceso a esto</h1>
+<p>{% if mensaje %}{{ mensaje }}{% else %}Tu perfil no puede ver esta página. El intento quedó registrado. Si crees que es un error, avisa a tu jefatura.{% endif %}</p>
+<a class="boton boton--bloque" href="/">Volver al inicio</a>
+{% endblock %}

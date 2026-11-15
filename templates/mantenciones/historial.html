@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block titulo %}Historial · COVEPA{% endblock %}
+{% block ancho %}contenedor--ancho{% endblock %}
+{% block contenido %}
+<div class="titulo-pagina"><h1>Historial de mantenciones</h1></div>
+<form class="filtros" method="get">
+  <div><label for="equipo">Equipo</label><input class="campo" id="equipo" name="equipo" value="{{ filtros.equipo }}" placeholder="Ej. GEN-FRE-01"></div>
+  <div><label for="tecnico">Técnico</label>
+    <select class="campo" id="tecnico" name="tecnico"><option value="">Todos</option>
+      {% for t in tecnicos %}<option value="{{ t.pk }}"{% if filtros.tecnico == t.pk|stringformat:"s" %} selected{% endif %}>{{ t.get_full_name }}</option>{% endfor %}
+    </select></div>
+  <div><label for="desde">Desde</label><input class="campo" type="date" id="desde" name="desde" value="{{ filtros.desde }}"></div>
+  <div><label for="hasta">Hasta</label><input class="campo" type="date" id="hasta" name="hasta" value="{{ filtros.hasta }}"></div>
+  <button class="boton boton--secundario" type="submit">Filtrar</button>
+</form>
+{% if registros %}
+<div class="tabla-envoltura"><table class="tabla">
+  <thead><tr><th>Fecha</th><th>Equipo</th><th>Técnico</th><th>Duración</th><th>Plantilla</th><th></th></tr></thead>
+  <tbody>
+  {% for r in registros %}
+    <tr>
+      <td>{{ r.inicio|date:"d/m/Y H:i" }}</td>
+      <td><span class="codigo">{{ r.equipo.codigo }}</span><br><span class="item__meta">{{ r.equipo.nombre }}</span></td>
+      <td>{{ r.tecnico.get_full_name }}</td>
+      <td>{{ r.duracion_min }} min</td>
+      <td>{{ r.plantilla.nombre }} <span class="item__meta">v{{ r.version_plantilla }}</span></td>
+      <td><a href="{% url 'mantenciones:detalle' r.pk %}">Ver detalle</a></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table></div>
+{% include "partials/paginacion.html" %}
+{% else %}
+<div class="vacio"><strong>No hay mantenciones en este período</strong>Prueba con otras fechas o quita algún filtro.</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load covepa %}
+{% block titulo %}Planes de mantención · COVEPA{% endblock %}
+{% block contenido %}
+<div class="titulo-pagina">
+  <h1>Planes de mantención</h1>
+  <a class="boton" href="{% url 'mantenciones:plan_nuevo' %}">Crear plan</a>
+</div>
+<form class="filtros" method="get">
+  <div><label for="equipo">Equipo</label><input class="campo" id="equipo" name="equipo" value="{{ filtros.equipo }}" placeholder="Código del equipo"></div>
+  <button class="boton boton--secundario" type="submit">Filtrar</button>
+</form>
+{% if planes %}
+<ul class="lista">
+  {% for p in planes %}
+  <li><a class="item item--{% if p.activo %}{{ p.dias_para_vencer|tono_dias }}{% else %}neutro{% endif %}" href="{% url 'mantenciones:plan_editar' p.pk %}">
+    <span class="item__titulo">{{ p.actividad }} · <span class="codigo">{{ p.equipo.codigo }}</span></span>
+    <span class="item__meta">Cada {{ p.frecuencia_dias }} días · {{ p.plantilla.nombre }}</span>
+    <span class="item__lado">{% if p.activo %}<span class="chip chip--{{ p.dias_para_vencer|tono_dias }}">{{ p.dias_para_vencer|texto_dias }}</span>{% else %}<span class="chip">Inactivo</span>{% endif %}</span>
+  </a></li>
+  {% endfor %}
+</ul>
+{% else %}<div class="vacio"><strong>No hay planes de mantención</strong>Define cada cuántos días se repite una mantención y avisaremos a los técnicos.</div>{% endif %}
+{% endblock %}

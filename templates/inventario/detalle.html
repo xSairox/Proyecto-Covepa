@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% load covepa %}
+{% block titulo %}{{ equipo.codigo }} · COVEPA{% endblock %}
+{% block contenido %}
+<p class="migas"><a href="{% url 'inventario:lista' %}">Equipos</a></p>
+<div class="titulo-pagina">
+  <h1><span class="codigo">{{ equipo.codigo }}</span> {{ equipo.nombre }}</h1>
+  <span class="chip chip--{{ equipo.estado|tono_equipo }}">{{ equipo.estado }}</span>
+</div>
+
+<section class="ficha" aria-label="Hoja de vida">
+  <dl class="datos">
+    <div><dt>Categoría</dt><dd>{{ equipo.categoria }}</dd></div>
+    <div><dt>Sucursal</dt><dd>{{ equipo.sucursal }}</dd></div>
+    <div><dt>Marca y modelo</dt><dd>{{ equipo.marca|default:"—" }} {{ equipo.modelo }}</dd></div>
+    <div><dt>Ubicación</dt><dd>{{ equipo.ubicacion|default:"—" }}</dd></div>
+    <div><dt>En servicio desde</dt><dd>{{ equipo.fecha_alta|date:"d/m/Y" }}</dd></div>
+    {% if equipo.fecha_baja %}<div><dt>Dado de baja</dt><dd>{{ equipo.fecha_baja|date:"d/m/Y" }}</dd></div>{% endif %}
+    {% if externos %}<div><dt>Técnicos externos</dt><dd>{% for t in externos %}{{ t.get_full_name }} ({{ t.empresa_externa }}){% if not forloop.last %}, {% endif %}{% endfor %}</dd></div>{% endif %}
+  </dl>
+  {% if perfil_codigo == "jefatura" and not equipo.esta_de_baja %}
+  <div class="acciones">
+    <a class="boton boton--secundario boton--chico" href="{% url 'inventario:editar' equipo.pk %}">Editar</a>
+    <details class="confirmar">
+      <summary class="boton boton--peligro boton--chico">Dar de baja</summary>
+      <div class="cuerpo">
+        <p>El equipo no se elimina: queda en estado «Baja» y conserva todo su historial. Sus planes de mantención se desactivan.</p>
+        <form method="post" action="{% url 'inventario:baja' equipo.pk %}">{% csrf_token %}<button class="boton boton--peligro boton--chico" type="submit">Confirmar la baja</button></form>
+      </div>
+    </details>
+  </div>
+  {% endif %}
+</section>
+
+{% if not equipo.esta_de_baja and es_tecnico %}
+<div class="acciones" style="margin:0 0 16px"><a class="boton boton--bloque" href="{% url 'mantenciones:registrar' %}?equipo={{ equipo.pk }}">Registrar mantención de este equipo</a></div>
+{% endif %}
+
+<h2>Mantenciones programadas</h2>
+{% if planes %}
+<ul class="lista">
+  {% for p in planes %}
+  <li class="item item--{% if p.activo %}{{ p.dias_para_vencer|tono_dias }}{% else %}neutro{% endif %}">
+    <span class="item__titulo">{{ p.actividad }}</span>
+    <span class="item__meta">Cada {{ p.frecuencia_dias }} días · {{ p.plantilla.nombre }} · Última: {{ p.ultima_fecha|date:"d/m/Y"|default:"sin registro" }}</span>
+    <span class="item__lado">{% if p.activo %}<span class="chip chip--{{ p.dias_para_vencer|tono_dias }}">{{ p.dias_para_vencer|texto_dias }}</span>{% else %}<span class="chip">Plan inactivo</span>{% endif %}</span>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}<p class="item__meta">Este equipo aún no tiene planes de mantención.</p>{% endif %}
+
+<h2>Últimas mantenciones</h2>
+{% if registros %}
+<ul class="lista">
+  {% for r in registros %}
+  <li><a class="item item--ok" href="{% url 'mantenciones:detalle' r.pk %}">
+    <span class="item__titulo">{{ r.inicio|date:"d/m/Y H:i" }}</span>
+    <span class="item__meta">{{ r.tecnico.get_full_name }} · {{ r.duracion_min }} min · plantilla v{{ r.version_plantilla }}</span>
+  </a></li>
+  {% endfor %}
+</ul>
+{% else %}<p class="item__meta">Todavía no hay mantenciones registradas.</p>{% endif %}
+
+<h2>Tickets</h2>
+{% if tickets %}
+<ul class="lista">
+  {% for t in tickets %}
+  <li><a class="item item--{{ t.estado|tono_ticket }}" href="{% url 'tickets:detalle' t.pk %}">
+    <span class="item__titulo">{{ t.numero }} <span class="chip chip--{{ t.estado|tono_ticket }}">{{ t.estado }}</span></span>
+    <span class="item__meta">{{ t.descripcion|truncatechars:90 }}</span>
+  </a></li>
+  {% endfor %}
+</ul>
+{% else %}<p class="item__meta">Sin tickets para este equipo.</p>{% endif %}
+
+<h2>Versiones de firmware y software</h2>
+{% if versiones %}
+<div class="tabla-envoltura"><table class="tabla">
+  <thead><tr><th>Tipo</th><th>Versión</th><th>Fecha</th><th>Vigente</th></tr></thead>
+  <tbody>{% for v in versiones %}<tr><td>{{ v.get_tipo_display }}</td><td class="codigo">{{ v.version }}</td><td>{{ v.fecha|date:"d/m/Y" }}</td><td>{% if v.actual %}<span class="chip chip--ok">Vigente</span>{% else %}Anterior{% endif %}</td></tr>{% endfor %}</tbody>
+</table></div>
+{% else %}<p class="item__meta">Aún no hay versiones registradas.</p>{% endif %}
+
+{% if perfil_codigo == "jefatura" and not equipo.esta_de_baja %}
+<details class="confirmar">
+  <summary class="boton boton--secundario boton--chico">Registrar una versión nueva</summary>
+  <div class="cuerpo">
+    <form method="post" action="{% url 'inventario:version_nueva' equipo.pk %}" class="formulario">
+      {% csrf_token %}
+      {% include "partials/formulario_campos.html" with form=form_version %}
+      <button class="boton boton--chico" type="submit">Guardar versión</button>
+    </form>
+  </div>
+</details>
+{% endif %}
+{% endblock %}

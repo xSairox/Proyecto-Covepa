@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block titulo %}Usuarios · COVEPA{% endblock %}
+{% block ancho %}contenedor--ancho{% endblock %}
+{% block contenido %}
+<div class="titulo-pagina">
+  <h1>Usuarios</h1>
+  <a class="boton" href="{% url 'cuentas:usuario_nuevo' %}">Crear usuario</a>
+</div>
+<form class="filtros" method="get">
+  <div><label for="q">Buscar</label><input class="campo" id="q" name="q" value="{{ filtros.q }}" placeholder="Nombre o correo"></div>
+  <div><label for="perfil">Perfil</label>
+    <select class="campo" id="perfil" name="perfil"><option value="">Todos</option>
+      {% for p in perfiles %}<option value="{{ p.codigo }}"{% if filtros.perfil == p.codigo %} selected{% endif %}>{{ p.nombre }}</option>{% endfor %}
+    </select></div>
+  <div><label for="estado">Estado</label>
+    <select class="campo" id="estado" name="estado">
+      <option value="">Todos</option>
+      <option value="activo"{% if filtros.estado == "activo" %} selected{% endif %}>Activos</option>
+      <option value="inactivo"{% if filtros.estado == "inactivo" %} selected{% endif %}>Desactivados</option>
+    </select></div>
+  <button class="boton boton--secundario" type="submit">Filtrar</button>
+</form>
+
+{% if usuarios %}
+<div class="tabla-envoltura">
+<table class="tabla">
+  <thead><tr><th>Nombre</th><th>Perfil</th><th>Sucursal</th><th>Estado</th><th>Acciones</th></tr></thead>
+  <tbody>
+  {% for u in usuarios %}
+    <tr>
+      <td><strong>{{ u.get_full_name }}</strong><br><span class="item__meta">{{ u.correo }}{% if u.empresa_externa %} · {{ u.empresa_externa }}{% endif %}</span></td>
+      <td>{{ u.perfil.nombre }}</td>
+      <td>{{ u.sucursal|default:"—" }}</td>
+      <td>{% if u.is_active %}{% if u.has_usable_password %}<span class="chip chip--ok">Activo</span>{% else %}<span class="chip chip--alerta">Invitación pendiente</span>{% endif %}{% else %}<span class="chip chip--neutro">Desactivado</span>{% endif %}{% if u.esta_bloqueado %} <span class="chip chip--vencido">Bloqueado</span>{% endif %}</td>
+      <td>
+        <div class="item__lado">
+          <a class="boton boton--secundario boton--chico" href="{% url 'cuentas:usuario_editar' u.pk %}">Editar</a>
+          {% if u.is_active and not u.has_usable_password %}
+          <form method="post" action="{% url 'cuentas:usuario_reinvitar' u.pk %}">{% csrf_token %}<button class="boton boton--secundario boton--chico" type="submit">Nuevo enlace</button></form>
+          {% endif %}
+          {% if u.pk != user.pk %}
+          <form method="post" action="{% url 'cuentas:usuario_estado' u.pk %}">{% csrf_token %}
+            <button class="boton boton--chico {% if u.is_active %}boton--peligro{% else %}boton--amarillo{% endif %}" type="submit">{% if u.is_active %}Desactivar{% else %}Reactivar{% endif %}</button>
+          </form>
+          {% endif %}
+        </div>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% include "partials/paginacion.html" %}
+{% else %}
+<div class="vacio"><strong>No hay usuarios con esos filtros</strong>Cambia los filtros o crea un usuario nuevo.</div>
+{% endif %}
+{% endblock %}
