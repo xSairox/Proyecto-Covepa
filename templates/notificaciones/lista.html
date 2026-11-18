@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block titulo %}Avisos · COVEPA{% endblock %}
+{% block contenido %}
+<div class="titulo-pagina">
+  <h1>Avisos</h1>
+  {% if avisos_sin_leer %}<form method="post" action="{% url 'notificaciones:leer_todas' %}">{% csrf_token %}<button class="boton boton--secundario boton--chico" type="submit">Marcar todos como leídos</button></form>{% endif %}
+</div>
+{% if avisos %}
+<ul class="lista">
+  {% for a in avisos %}
+  <li class="item {% if a.leida %}item--neutro{% else %}item--alerta{% endif %}">
+    <span class="item__titulo">{{ a.texto }}</span>
+    <span class="item__meta">{{ a.fecha|date:"d/m/Y H:i" }}</span>
+    <span class="item__lado">
+      <form method="post" action="{% url 'notificaciones:leer' a.pk %}">{% csrf_token %}
+        <button class="boton boton--chico {% if a.leida %}boton--secundario{% endif %}" type="submit">{% if a.url %}Ver{% elif a.leida %}Leído{% else %}Marcar como leído{% endif %}</button>
+      </form>
+    </span>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<div class="vacio"><strong>No tienes avisos</strong>Aquí verás mantenciones por vencer y tickets que necesitan tu atención.</div>
+{% endif %}
+{% endblock %}

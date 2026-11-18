@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block titulo %}Reportar una falla · COVEPA{% endblock %}
+{% block contenido %}
+<p class="migas"><a href="{% url 'tickets:lista' %}">Tickets</a></p>
+<div class="titulo-pagina"><h1>Reportar una falla</h1></div>
+<form method="post" class="formulario" novalidate>
+  {% csrf_token %}
+  {% include "partials/formulario_campos.html" %}
+  <p class="ayuda">El ticket queda pendiente de aprobación. La jefatura recibe un aviso y te contará qué decide.</p>
+  <div class="acciones">
+    <button class="boton" type="submit">Enviar ticket</button>
+    <a class="boton boton--secundario" href="{% url 'tickets:lista' %}">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

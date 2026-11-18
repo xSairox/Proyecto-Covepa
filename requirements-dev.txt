@@ -1,0 +1,4 @@
+-r requirements.txt
+locust>=2.29
+ruff>=0.6
+coverage>=7.6

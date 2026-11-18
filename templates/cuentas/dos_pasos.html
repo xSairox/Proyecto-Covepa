@@ -1,0 +1,14 @@
+{% extends "base_ingreso.html" %}
+{% block titulo %}Verificación en dos pasos · COVEPA{% endblock %}
+{% block contenido %}
+<h1>Verificación en dos pasos</h1>
+<p>Abre tu app autenticadora e ingresa el código de 6 dígitos de COVEPA Mantenciones.</p>
+<form method="post" class="formulario" novalidate>
+  {% csrf_token %}
+  {% include "partials/formulario_campos.html" %}
+  <button class="boton boton--bloque" type="submit">Verificar</button>
+</form>
+<form method="post" action="{% url 'cuentas:logout' %}" style="margin-top:12px">{% csrf_token %}
+  <button class="boton boton--secundario boton--bloque" type="submit">Salir</button>
+</form>
+{% endblock %}

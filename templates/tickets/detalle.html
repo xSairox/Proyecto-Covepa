@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% load static covepa %}
+{% block titulo %}{{ ticket.numero }} · COVEPA{% endblock %}
+{% block contenido %}
+<p class="migas"><a href="{% url 'tickets:lista' %}">Tickets</a></p>
+<div class="titulo-pagina">
+  <h1>{{ ticket.numero }}</h1>
+  <span class="chip chip--{{ ticket.estado|tono_ticket }}">{{ ticket.estado }}</span>
+</div>
+
+<section class="ficha">
+  <p style="margin-bottom:12px">{{ ticket.descripcion|linebreaksbr }}</p>
+  <dl class="datos">
+    <div><dt>Tipo</dt><dd>{{ ticket.get_tipo_display }}</dd></div>
+    <div><dt>Equipo</dt><dd>{% if ticket.equipo %}<a href="{% url 'inventario:detalle' ticket.equipo.pk %}" class="codigo">{{ ticket.equipo.codigo }}</a> {{ ticket.equipo.nombre }}{% else %}—{% endif %}</dd></div>
+    <div><dt>Reportado por</dt><dd>{{ ticket.solicitante.get_full_name }}, {{ ticket.fecha_creacion|date:"d/m/Y H:i" }}</dd></div>
+    <div><dt>Técnico asignado</dt><dd>{{ ticket.tecnico.get_full_name|default:"Sin asignar" }}</dd></div>
+    {% if ticket.inicio_trabajo %}<div><dt>Inicio del trabajo</dt><dd>{{ ticket.inicio_trabajo|date:"d/m/Y H:i" }}</dd></div>{% endif %}
+    {% if ticket.termino_trabajo %}<div><dt>Término del trabajo</dt><dd>{{ ticket.termino_trabajo|date:"d/m/Y H:i" }}</dd></div>{% endif %}
+    {% if ticket.motivo_rechazo %}<div><dt>Motivo del rechazo</dt><dd>{{ ticket.motivo_rechazo }}</dd></div>{% endif %}
+  </dl>
+</section>
+
+{% if puede_aprobar %}
+<section class="ficha">
+  <h2 style="margin-top:0">Decidir</h2>
+  <form method="post" action="{% url 'tickets:accion' ticket.pk 'aprobar' %}" class="formulario">
+    {% csrf_token %}
+    {% include "partials/formulario_campos.html" with form=form_aprobar %}
+    <button class="boton" type="submit">Aprobar y asignar</button>
+  </form>
+  <details class="confirmar">
+    <summary class="boton boton--secundario">Rechazar</summary>
+    <div class="cuerpo">
+      <form method="post" action="{% url 'tickets:accion' ticket.pk 'rechazar' %}" class="formulario">
+        {% csrf_token %}{% include "partials/formulario_campos.html" with form=form_motivo %}
+        <button class="boton boton--peligro" type="submit">Rechazar con este motivo</button>
+      </form>
+    </div>
+  </details>
+</section>
+{% endif %}
+
+{% if puede_iniciar %}
+<form method="post" action="{% url 'tickets:accion' ticket.pk 'iniciar' %}" class="acciones" style="margin:0 0 16px">{% csrf_token %}
+  <button class="boton boton--bloque" type="submit">Iniciar el trabajo</button>
+</form>
+{% endif %}
+
+{% if puede_realizar %}
+<section class="ficha">
+  <h2 style="margin-top:0">Registrar el trabajo realizado</h2>
+  <form method="post" action="{% url 'tickets:accion' ticket.pk 'realizar' %}" class="formulario" id="form-realizar" novalidate>
+    {% csrf_token %}
+    {% include "partials/formulario_campos.html" with form=form_realizar %}
+    <h3 style="margin:0">Materiales usados</h3>
+    <div id="materiales"></div>
+    <div><button class="boton boton--secundario boton--chico" type="button" id="agregar-material">Agregar material</button></div>
+    <h3 style="margin:8px 0 0">Facturas o guías de despacho</h3>
+    <p class="ayuda" style="margin:0">Toma una foto del documento. Se sube directo a Cloudinary.</p>
+    <div id="documentos"></div>
+    <div><button class="boton boton--secundario boton--chico" type="button" id="agregar-documento">Agregar documento</button></div>
+    <ul class="errorlist" id="errores-realizar" role="alert" hidden></ul>
+    <button class="boton boton--bloque" type="submit" id="enviar-realizar">Marcar como realizado</button>
+  </form>
+</section>
+{% endif %}
+
+{% if puede_cerrar %}
+<section class="ficha">
+  <h2 style="margin-top:0">Revisar el trabajo</h2>
+  <form method="post" action="{% url 'tickets:accion' ticket.pk 'cerrar' %}" class="acciones" style="margin:0">{% csrf_token %}
+    <button class="boton" type="submit">Cerrar ticket</button>
+  </form>
+  <details class="confirmar">
+    <summary class="boton boton--secundario">Devolver al técnico</summary>
+    <div class="cuerpo">
+      <form method="post" action="{% url 'tickets:accion' ticket.pk 'devolver' %}" class="formulario">
+        {% csrf_token %}{% include "partials/formulario_campos.html" with form=form_motivo %}
+        <button class="boton boton--peligro" type="submit">Devolver con estas observaciones</button>
+      </form>
+    </div>
+  </details>
+</section>
+{% endif %}
+
+{% if materiales %}
+<h2>Materiales</h2>
+<div class="tabla-envoltura"><table class="tabla"><thead><tr><th>Material</th><th>Cantidad</th></tr></thead>
+<tbody>{% for m in materiales %}<tr><td>{{ m.descripcion }}</td><td>{{ m.cantidad|floatformat:"-2" }} {{ m.unidad }}</td></tr>{% endfor %}</tbody></table></div>
+{% endif %}
+
+{% if documentos %}
+<h2>Documentos de respaldo</h2>
+<ul class="lista">
+  {% for d in documentos %}
+  <li class="item item--ok evidencia">
+    <span class="item__titulo">{{ d.get_tipo_display }}{% if d.numero %} N° {{ d.numero }}{% endif %}{% if d.proveedor %} · {{ d.proveedor }}{% endif %}{% if d.monto %} · {{ d.monto|pesos }}{% endif %}</span>
+    <a href="{{ d.url_foto }}" target="_blank" rel="noopener"><img src="{{ d.url_foto }}" alt="Foto del documento" loading="lazy"></a>
+  </li>
+  {% endfor %}
+</ul>
+{% endif %}
+
+<h2>Historial</h2>
+<ol class="linea">
+  {% for h in historial %}
+  <li><strong>{{ h.estado }}</strong> · {{ h.fecha|date:"d/m/Y H:i" }}{% if h.usuario %} · {{ h.usuario.get_full_name }}{% endif %}{% if h.observacion %}<br><span class="item__meta">{{ h.observacion }}</span>{% endif %}</li>
+  {% endfor %}
+</ol>
+{% endblock %}
+{% block scripts %}{% if puede_realizar %}<script src="{% static 'js/ticket_realizar.js' %}" defer></script>{% endif %}{% endblock %}

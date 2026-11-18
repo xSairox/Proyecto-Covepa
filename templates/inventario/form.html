@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block titulo %}{{ titulo }} · COVEPA{% endblock %}
+{% block contenido %}
+<p class="migas"><a href="{% url 'inventario:lista' %}">Equipos</a></p>
+<div class="titulo-pagina"><h1>{{ titulo }}</h1></div>
+<form method="post" class="formulario" novalidate>
+  {% csrf_token %}
+  {% include "partials/formulario_campos.html" %}
+  <div class="acciones">
+    <button class="boton" type="submit">Guardar equipo</button>
+    <a class="boton boton--secundario" href="{% if equipo %}{% url 'inventario:detalle' equipo.pk %}{% else %}{% url 'inventario:lista' %}{% endif %}">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

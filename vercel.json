@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "config/wsgi.py": { "maxDuration": 30 }
+  },
+  "crons": [
+    { "path": "/cron/vencimientos/", "schedule": "0 11 * * *" }
+  ]
+}

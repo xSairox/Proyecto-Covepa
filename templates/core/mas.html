@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block titulo %}Más · COVEPA{% endblock %}
+{% block contenido %}
+<div class="titulo-pagina"><h1>Más opciones</h1></div>
+<ul class="lista">
+  <li><a class="item" href="{% url 'cuentas:usuarios' %}"><span class="item__titulo">Usuarios</span><span class="item__meta">Crear, editar y desactivar cuentas</span></a></li>
+  <li><a class="item" href="{% url 'mantenciones:plantillas' %}"><span class="item__titulo">Plantillas de formulario</span><span class="item__meta">Controles por tipo de equipo, con versiones</span></a></li>
+  <li><a class="item" href="{% url 'mantenciones:planes' %}"><span class="item__titulo">Planes de mantención</span><span class="item__meta">Cada cuántos días se repite cada mantención</span></a></li>
+  <li><a class="item" href="{% url 'mantenciones:historial' %}"><span class="item__titulo">Historial</span><span class="item__meta">Mantenciones por equipo y período</span></a></li>
+  <li><a class="item" href="{% url 'auditoria:lista' %}"><span class="item__titulo">Auditoría</span><span class="item__meta">Registro de cambios, solo lectura</span></a></li>
+</ul>
+{% endblock %}

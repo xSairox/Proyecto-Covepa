@@ -1,0 +1,12 @@
+{% extends "base_ingreso.html" %}
+{% block titulo %}{{ titulo }} · COVEPA{% endblock %}
+{% block contenido %}
+<h1>{{ titulo }}</h1>
+<p>{{ ayuda }}</p>
+<form method="post" class="formulario" novalidate>
+  {% csrf_token %}
+  {% include "partials/formulario_campos.html" %}
+  <p class="ayuda">Mínimo 10 caracteres, con letras y números.</p>
+  <button class="boton boton--bloque" type="submit">Guardar contraseña</button>
+</form>
+{% endblock %}

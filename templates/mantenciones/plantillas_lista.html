@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block titulo %}Plantillas · COVEPA{% endblock %}
+{% block contenido %}
+<div class="titulo-pagina">
+  <h1>Plantillas de formulario</h1>
+  <a class="boton" href="{% url 'mantenciones:plantilla_nueva' %}">Crear plantilla</a>
+</div>
+{% if plantillas %}
+<ul class="lista">
+  {% for p in plantillas %}
+  <li><a class="item item--{% if p.activa %}ok{% else %}neutro{% endif %}" href="{% url 'mantenciones:plantilla_editar' p.pk %}">
+    <span class="item__titulo">{{ p.nombre }} <span class="chip">v{{ p.version_actual }}</span>{% if not p.activa %} <span class="chip">Inactiva</span>{% endif %}</span>
+    <span class="item__meta">{{ p.categoria }}</span>
+  </a></li>
+  {% endfor %}
+</ul>
+{% else %}<div class="vacio"><strong>Aún no hay plantillas</strong>Crea una por tipo de equipo para que los técnicos completen los mismos controles.</div>{% endif %}
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load static %}
+{% block titulo %}Inicio · COVEPA{% endblock %}
+{% block contenido %}
+<div class="titulo-pagina">
+  <h1>Hola, {{ user.nombre }}</h1>
+  <a class="boton" href="{% url 'mantenciones:registrar' %}">Registrar mantención</a>
+</div>
+
+<div class="panel-sync" id="panel-sync" hidden>
+  <div class="panel-sync__texto" id="texto-sync" aria-live="polite"></div>
+  <button class="boton boton--amarillo boton--chico" type="button" id="boton-sync">Enviar ahora</button>
+</div>
+
+<noscript><p class="mensaje mensaje--warning">Esta pantalla necesita JavaScript para funcionar sin conexión.</p></noscript>
+
+<h2 style="margin-top:8px">Mantenciones pendientes</h2>
+<ul class="lista" id="lista-pendientes"><li class="vacio">Cargando…</li></ul>
+
+<h2>Mis tickets</h2>
+<ul class="lista" id="lista-tickets"><li class="vacio">Cargando…</li></ul>
+
+<h2>Registros recientes</h2>
+<ul class="lista" id="lista-recientes"><li class="vacio">Cargando…</li></ul>
+<p class="ayuda" id="nota-datos"></p>
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/db.js' %}" defer></script><script src="{% static 'js/sync.js' %}" defer></script><script src="{% static 'js/inicio.js' %}" defer></script>{% endblock %}

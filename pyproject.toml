@@ -1,0 +1,44 @@
+[project]
+name = "covepa-mantenciones"
+version = "0.3.0"
+description = "Sistema de Gestión de Inventario y Mantenciones de Equipos - COVEPA SpA (piloto Fresia)"
+requires-python = ">=3.12"
+# Vercel instala desde pyproject.toml (tiene prioridad sobre requirements.txt).
+# Mantén esta lista igual a requirements.txt (hay una prueba que lo verifica).
+dependencies = [
+    "Django>=5.2,<5.3",
+    "psycopg[binary]>=3.2",
+    "dj-database-url>=2.2",
+    "pymongo>=4.8",
+    "dnspython>=2.6",
+    "cloudinary>=1.41",
+    "whitenoise>=6.7",
+    "pyotp>=2.9",
+    "segno>=1.6",
+    "cryptography>=43.0",
+    "python-dotenv>=1.0",
+]
+
+[tool.uv]
+package = false  # es una aplicación, no una librería: solo se instalan las dependencias
+
+[tool.vercel]
+entrypoint = "config.wsgi:application"
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+extend-exclude = ["migrations", "staticfiles"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "S", "DJ"]
+ignore = ["S101", "S311"]
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/*" = ["S", "B"]
+"tests/*" = ["S", "B"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+# Pruebas puras (sin Django): pytest core/tests. Las pruebas con base de datos se corren con: python manage.py test
+python_files = ["test_*.py"]

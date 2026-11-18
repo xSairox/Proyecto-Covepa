@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load covepa static %}
+{% block titulo %}Mi perfil · COVEPA{% endblock %}
+{% block contenido %}
+<div class="titulo-pagina"><h1>Mi perfil</h1></div>
+<section class="ficha">
+  <dl class="datos">
+    <div><dt>Nombre</dt><dd>{{ user.get_full_name }}</dd></div>
+    <div><dt>Correo</dt><dd>{{ user.correo }}</dd></div>
+    <div><dt>Perfil</dt><dd>{{ user.perfil.nombre }}</dd></div>
+    <div><dt>Sucursal</dt><dd>{{ user.sucursal|default:"Todas" }}</dd></div>
+    {% if user.empresa_externa %}<div><dt>Empresa</dt><dd>{{ user.empresa_externa }}</dd></div>{% endif %}
+    <div><dt>Dos pasos</dt><dd>{% if user.dos_pasos_activo %}Activada{% elif user.perfil.requiere_dos_pasos %}Pendiente de activar{% else %}No requerida{% endif %}</dd></div>
+  </dl>
+</section>
+<section class="ficha">
+  <h2 style="margin-top:0">Lo que puedes hacer</h2>
+  <ul>{% for permiso in permisos %}<li>{{ permiso|permiso_legible }}</li>{% endfor %}</ul>
+</section>
+<section class="ficha" id="instalar" hidden>
+  <h2 style="margin-top:0">Instalar en el celular</h2>
+  <p>Instala COVEPA para abrirla desde la pantalla de inicio, a pantalla completa, como cualquier otra app. Sigue funcionando sin señal.</p>
+  <button class="boton" type="button" id="instalar-boton" hidden>Instalar la app</button>
+  <p class="ayuda" id="instalar-ios" hidden>En iPhone o iPad, abre esta página en Safari, toca <strong>Compartir</strong> y luego <strong>Añadir a pantalla de inicio</strong>.</p>
+</section>
+<div class="acciones">
+  <a class="boton boton--secundario" href="{% url 'cuentas:cambiar_clave' %}">Cambiar contraseña</a>
+  <form method="post" action="{% url 'cuentas:logout' %}">{% csrf_token %}
+    <button class="boton" type="submit">Cerrar sesión</button>
+  </form>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/instalar.js' %}" defer></script>{% endblock %}

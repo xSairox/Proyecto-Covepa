@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block titulo %}Mantención {{ registro.equipo.codigo }} · COVEPA{% endblock %}
+{% block contenido %}
+<p class="migas"><a href="{% url 'inventario:lista' %}">Equipos</a> / <a href="{% url 'inventario:detalle' registro.equipo.pk %}">{{ registro.equipo.codigo }}</a></p>
+<div class="titulo-pagina">
+  <h1>Mantención del {{ registro.inicio|date:"d/m/Y" }}</h1>
+  <span class="chip chip--ok">Sincronizada</span>
+</div>
+<section class="ficha">
+  <dl class="datos">
+    <div><dt>Equipo</dt><dd><span class="codigo">{{ registro.equipo.codigo }}</span> {{ registro.equipo.nombre }}</dd></div>
+    <div><dt>Técnico</dt><dd>{{ registro.tecnico.get_full_name }}</dd></div>
+    <div><dt>Inicio</dt><dd>{{ registro.inicio|date:"d/m/Y H:i" }}</dd></div>
+    <div><dt>Término</dt><dd>{{ registro.termino|date:"d/m/Y H:i" }} ({{ registro.duracion_min }} min)</dd></div>
+    <div><dt>Formulario</dt><dd>{{ registro.plantilla.nombre }}, versión {{ registro.version_plantilla }}</dd></div>
+    <div><dt>Origen</dt><dd>{% if registro.origen == "app_movil_sin_conexion" %}App móvil, registrada sin conexión{% else %}{{ registro.origen }}{% endif %}</dd></div>
+    <div><dt>Identificador</dt><dd class="codigo">{{ registro.pk }}</dd></div>
+  </dl>
+</section>
+
+<h2>Respuestas</h2>
+{% if filas %}
+<section class="ficha"><dl class="datos">{% for f in filas %}<div><dt>{{ f.etiqueta }}</dt><dd>{{ f.valor }}</dd></div>{% endfor %}</dl></section>
+{% else %}
+<p class="mensaje mensaje--warning">No se encontró el formulario completo en la base de documentos. Los datos de arriba sí están registrados.</p>
+{% endif %}
+
+{% if evidencias %}
+<h2>Fotos y videos</h2>
+<ul class="lista">
+  {% for e in evidencias %}
+  <li class="evidencia item item--ok">
+    <span class="item__titulo">{{ e.etiqueta }}</span>
+    {% if e.tipo == "video" %}<video controls preload="none" src="{{ e.url }}"></video>{% else %}<a href="{{ e.url }}" target="_blank" rel="noopener"><img src="{{ e.url }}" alt="{{ e.etiqueta }}" loading="lazy"></a>{% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{% endif %}
+{% endblock %}

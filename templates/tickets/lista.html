@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load covepa %}
+{% block titulo %}Tickets · COVEPA{% endblock %}
+{% block contenido %}
+<div class="titulo-pagina">
+  <h1>{% if perfil_codigo == "trabajador" %}Mis tickets{% else %}Tickets{% endif %}</h1>
+  {% if puede_crear %}<a class="boton" href="{% url 'tickets:nuevo' %}">{% if perfil_codigo == "trabajador" %}Reportar una falla{% else %}Crear ticket{% endif %}</a>{% endif %}
+</div>
+<form class="filtros" method="get">
+  <div><label for="estado">Estado</label>
+    <select class="campo" id="estado" name="estado">
+      <option value="">Todos</option>
+      <option value="abiertos"{% if filtros.estado == "abiertos" %} selected{% endif %}>Abiertos</option>
+      {% for e in estados %}<option value="{{ e }}"{% if filtros.estado == e %} selected{% endif %}>{{ e }}</option>{% endfor %}
+    </select></div>
+  <div><label for="q">Buscar</label><input class="campo" id="q" name="q" value="{{ filtros.q }}" placeholder="Texto o código de equipo"></div>
+  <button class="boton boton--secundario" type="submit">Filtrar</button>
+</form>
+{% if tickets %}
+<ul class="lista">
+  {% for t in tickets %}
+  <li><a class="item item--{{ t.estado|tono_ticket }}" href="{% url 'tickets:detalle' t.pk %}">
+    <span class="item__titulo">{{ t.numero }} <span class="chip chip--{{ t.estado|tono_ticket }}">{{ t.estado }}</span></span>
+    <span>{{ t.descripcion|truncatechars:110 }}</span>
+    <span class="item__meta">{% if t.equipo %}<span class="codigo">{{ t.equipo.codigo }}</span> · {% endif %}{{ t.fecha_creacion|date:"d/m/Y H:i" }} · {{ t.solicitante.get_full_name }}{% if t.tecnico %} · Asignado a {{ t.tecnico.get_full_name }}{% endif %}</span>
+  </a></li>
+  {% endfor %}
+</ul>
+{% include "partials/paginacion.html" %}
+{% else %}
+<div class="vacio"><strong>No hay tickets para mostrar</strong>{% if puede_crear %}Si algo falló, repórtalo y la jefatura lo revisará.{% else %}Cuando te asignen un trabajo, aparecerá aquí.{% endif %}</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,82 @@
+{
+  "info": {
+    "name": "COVEPA Mantenciones · API",
+    "description": "Pruebas manuales de la API (CP02, CP07, CP08, CP09). Inicia sesión en el navegador, copia las cookies 'sessionid' y 'csrftoken' y pégalas en las variables de la colección. El CSRF se envía en la cabecera X-CSRFToken.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {"key": "base", "value": "https://TU-PROYECTO.vercel.app"},
+    {"key": "sessionid", "value": ""},
+    {"key": "csrftoken", "value": ""},
+    {"key": "tecnico_id", "value": "2"},
+    {"key": "uuid", "value": "5f0c5f58-3b0f-4d8e-9b57-0a8b6b5a1c01"}
+  ],
+  "item": [
+    {
+      "name": "Sesión y token CSRF",
+      "request": {"method": "GET", "header": [{"key": "Cookie", "value": "sessionid={{sessionid}}; csrftoken={{csrftoken}}"}], "url": "{{base}}/api/v1/sesion/"},
+      "event": [{"listen": "test", "script": {"exec": ["pm.test('autenticado', () => pm.expect(pm.response.json().autenticado).to.eql(true));"]}}]
+    },
+    {
+      "name": "Paquete de datos sin conexión",
+      "request": {"method": "GET", "header": [{"key": "Cookie", "value": "sessionid={{sessionid}}; csrftoken={{csrftoken}}"}], "url": "{{base}}/api/v1/paquete/"},
+      "event": [{"listen": "test", "script": {"exec": ["pm.test('200 y plantillas', () => { pm.response.to.have.status(200); pm.expect(pm.response.json()).to.have.property('plantillas'); });"]}}]
+    },
+    {
+      "name": "CP07 · Horómetro final menor que el inicial (espera 400)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "X-CSRFToken", "value": "{{csrftoken}}"},
+          {"key": "Referer", "value": "{{base}}/"},
+          {"key": "Cookie", "value": "sessionid={{sessionid}}; csrftoken={{csrftoken}}"}
+        ],
+        "body": {"mode": "raw", "raw": "{\n  \"_id\": \"{{$guid}}\",\n  \"equipo\": {\"codigo\": \"GEN-FRE-01\", \"categoria\": \"Generador\"},\n  \"sucursal\": \"Fresia\",\n  \"plantilla\": {\"id\": 1, \"nombre\": \"Generador · prueba semanal\", \"version\": 1},\n  \"tecnico_id\": {{tecnico_id}},\n  \"inicio\": \"2026-11-20T09:00:00Z\",\n  \"termino\": \"2026-11-20T09:20:00Z\",\n  \"respuestas\": {\"horometro_inicial\": 1200, \"horometro_final\": 1100, \"nivel_aceite_ok\": true, \"nivel_combustible\": \"Lleno\"},\n  \"evidencias\": [],\n  \"origen\": \"app_movil\"\n}"},
+        "url": "{{base}}/api/v1/mantenciones/sincronizar/"
+      },
+      "event": [{"listen": "test", "script": {"exec": ["pm.test('400 por horómetro', () => { pm.response.to.have.status(400); pm.expect(pm.response.text()).to.include('debe ser mayor que'); });"]}}]
+    },
+    {
+      "name": "CP08 · Equipo no asignado al técnico externo (espera 403)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "X-CSRFToken", "value": "{{csrftoken}}"},
+          {"key": "Referer", "value": "{{base}}/"},
+          {"key": "Cookie", "value": "sessionid={{sessionid}}; csrftoken={{csrftoken}}"}
+        ],
+        "body": {"mode": "raw", "raw": "{\n  \"_id\": \"{{$guid}}\",\n  \"equipo\": {\"codigo\": \"GEN-FRE-01\", \"categoria\": \"Generador\"},\n  \"sucursal\": \"Fresia\",\n  \"plantilla\": {\"id\": 1, \"nombre\": \"Generador · prueba semanal\", \"version\": 1},\n  \"tecnico_id\": {{tecnico_id}},\n  \"inicio\": \"2026-11-20T09:00:00Z\",\n  \"termino\": \"2026-11-20T09:20:00Z\",\n  \"respuestas\": {\"horometro_inicial\": 1, \"horometro_final\": 2, \"nivel_aceite_ok\": true, \"nivel_combustible\": \"Lleno\"},\n  \"evidencias\": [],\n  \"origen\": \"app_movil\"\n}"},
+        "url": "{{base}}/api/v1/mantenciones/sincronizar/"
+      },
+      "event": [{"listen": "test", "script": {"exec": ["pm.test('403 sin acceso', () => pm.response.to.have.status(403));"]}}]
+    },
+    {
+      "name": "CP02 · Enviar el mismo UUID (1.º = 201, 2.º = 200 'duplicado')",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "X-CSRFToken", "value": "{{csrftoken}}"},
+          {"key": "Referer", "value": "{{base}}/"},
+          {"key": "Cookie", "value": "sessionid={{sessionid}}; csrftoken={{csrftoken}}"}
+        ],
+        "description": "Requiere una foto real en Cloudinary: reemplaza 'public_id' y 'url' por los de una foto subida a la carpeta autorizada. Envíalo dos veces seguidas.",
+        "body": {"mode": "raw", "raw": "{\n  \"_id\": \"{{uuid}}\",\n  \"equipo\": {\"codigo\": \"GEN-FRE-01\", \"categoria\": \"Generador\"},\n  \"sucursal\": \"Fresia\",\n  \"plantilla\": {\"id\": 1, \"nombre\": \"Generador · prueba semanal\", \"version\": 1},\n  \"tecnico_id\": {{tecnico_id}},\n  \"inicio\": \"2026-11-20T09:00:00Z\",\n  \"termino\": \"2026-11-20T09:20:00Z\",\n  \"respuestas\": {\"horometro_inicial\": 1200, \"horometro_final\": 1203.5, \"nivel_aceite_ok\": true, \"nivel_combustible\": \"Lleno\"},\n  \"evidencias\": [{\"campo\": \"foto_equipo\", \"tipo\": \"foto\", \"url\": \"https://res.cloudinary.com/TU_CLOUD/image/upload/covepa/mantenciones/foto.jpg\", \"public_id\": \"covepa/mantenciones/foto\", \"peso_kb\": 300}],\n  \"origen\": \"app_movil\"\n}"},
+        "url": "{{base}}/api/v1/mantenciones/sincronizar/"
+      },
+      "event": [{"listen": "test", "script": {"exec": ["pm.test('201 la primera vez, 200 la segunda', () => pm.expect([200, 201]).to.include(pm.response.code));"]}}]
+    },
+    {
+      "name": "Sin sesión (espera 401)",
+      "request": {"method": "GET", "header": [], "url": "{{base}}/api/v1/paquete/"},
+      "event": [{"listen": "test", "script": {"exec": ["pm.test('401', () => pm.response.to.have.status(401));"]}}]
+    },
+    {
+      "name": "Salud del sistema",
+      "request": {"method": "GET", "header": [], "url": "{{base}}/salud/"},
+      "event": [{"listen": "test", "script": {"exec": ["pm.test('ambas bases operativas', () => pm.expect(pm.response.json().estado).to.eql('ok'));"]}}]
+    }
+  ]
+}

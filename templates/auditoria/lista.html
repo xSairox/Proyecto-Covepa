@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load covepa %}
+{% block titulo %}Auditoría · COVEPA{% endblock %}
+{% block ancho %}contenedor--ancho{% endblock %}
+{% block contenido %}
+<div class="titulo-pagina"><h1>Auditoría</h1><span class="chip">Solo lectura</span></div>
+<form class="filtros" method="get">
+  <div><label for="accion">Acción</label>
+    <select class="campo" id="accion" name="accion"><option value="">Todas</option>
+      {% for a in acciones %}<option value="{{ a }}"{% if filtros.accion == a %} selected{% endif %}>{{ a|accion_legible }}</option>{% endfor %}
+    </select></div>
+  <div><label for="entidad">Entidad</label>
+    <select class="campo" id="entidad" name="entidad"><option value="">Todas</option>
+      {% for e in entidades %}<option value="{{ e }}"{% if filtros.entidad == e %} selected{% endif %}>{{ e }}</option>{% endfor %}
+    </select></div>
+  <div><label for="correo">Usuario</label><input class="campo" id="correo" name="correo" value="{{ filtros.correo }}" placeholder="Correo"></div>
+  <div><label for="desde">Desde</label><input class="campo" type="date" id="desde" name="desde" value="{{ filtros.desde }}"></div>
+  <div><label for="hasta">Hasta</label><input class="campo" type="date" id="hasta" name="hasta" value="{{ filtros.hasta }}"></div>
+  <button class="boton boton--secundario" type="submit">Filtrar</button>
+</form>
+{% if eventos %}
+<div class="tabla-envoltura"><table class="tabla">
+  <thead><tr><th>Fecha</th><th>Usuario</th><th>Acción</th><th>Entidad</th><th>Detalle</th><th>IP</th></tr></thead>
+  <tbody>
+  {% for e in eventos %}
+    <tr>
+      <td>{{ e.fecha|date:"d/m/Y H:i:s" }}</td>
+      <td>{{ e.usuario.correo|default:"—" }}</td>
+      <td><span class="chip">{{ e.accion|accion_legible }}</span></td>
+      <td>{{ e.entidad }}{% if e.entidad_id %} <span class="codigo">#{{ e.entidad_id }}</span>{% endif %}</td>
+      <td class="codigo" style="max-width:340px;word-break:break-word">{% if e.detalle %}{{ e.detalle }}{% endif %}</td>
+      <td class="codigo">{{ e.ip|default:"—" }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table></div>
+{% include "partials/paginacion.html" %}
+{% else %}
+<div class="vacio"><strong>No hay eventos con esos filtros</strong>Amplía el período o quita algún filtro.</div>
+{% endif %}
+{% endblock %}

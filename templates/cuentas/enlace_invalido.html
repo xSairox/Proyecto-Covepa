@@ -1,0 +1,6 @@
+{% extends "base_ingreso.html" %}
+{% block contenido %}
+<h1>Este enlace ya no sirve</h1>
+<p>Venció o ya se usó. Pide uno nuevo a tu jefatura, o si olvidaste tu contraseña, solicita un enlace de recuperación.</p>
+<a class="boton boton--bloque" href="{% url 'cuentas:recuperar' %}">Recuperar contraseña</a>
+{% endblock %}
