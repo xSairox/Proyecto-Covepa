@@ -214,8 +214,9 @@
     if (!paquete && navigator.onLine) paquete = await COVEPA.sync.refrescarPaquete();
     if (!paquete) { $('sin-datos').hidden = false; return; }
     form.hidden = false;
+    // append() nativo NO acepta arreglos (los convierte a texto): hay que esparcirlos con "...".
     selEquipo.append(el('option', { value: '', texto: 'Elige un equipo' }),
-      paquete.equipos.map((e) => el('option', { value: String(e.id), texto: `${e.codigo} · ${e.nombre}` })));
+      ...paquete.equipos.map((e) => el('option', { value: String(e.id), texto: `${e.codigo} · ${e.nombre}` })));
     const previo = params.get('equipo');
     if (previo && paquete.equipos.some((e) => String(e.id) === previo)) selEquipo.value = previo;
     else if (paquete.equipos.length === 1) selEquipo.value = String(paquete.equipos[0].id);
