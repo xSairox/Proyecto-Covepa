@@ -104,7 +104,17 @@
     if (navigator.serviceWorker && navigator.serviceWorker.controller) navigator.serviceWorker.controller.postMessage(mensaje);
   }
 
+  // Pantallas que el técnico necesita sin señal. Se piden desde su inicio (con señal) y tras cada actualización de la app,
+  // porque al actualizarse el service worker borra los cachés anteriores.
+  const PANTALLAS_DE_TERRENO = ['/mantenciones/inicio/', '/mantenciones/registrar/'];
+  function guardarPantallasDeTerreno() {
+    const sw = navigator.serviceWorker && navigator.serviceWorker.controller;
+    if (!sw || !navigator.onLine || document.body.dataset.esTecnico !== '1') return;
+    if (location.pathname === '/mantenciones/inicio/') sw.postMessage({ tipo: 'paginas', urls: PANTALLAS_DE_TERRENO });
+  }
+
   if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('controllerchange', guardarPantallasDeTerreno);
     window.addEventListener('load', async () => {
       try {
         const registro = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
@@ -113,6 +123,7 @@
         const recursos = performance.getEntriesByType('resource').map((r) => new URL(r.name).pathname).filter((p) => p.startsWith('/static/'));
         const mensaje = { tipo: 'cachear', urls: [...new Set(recursos)] };
         (registro.active || navigator.serviceWorker.controller).postMessage(mensaje);
+        guardarPantallasDeTerreno();
       } catch (e) {
         console.warn('No se pudo registrar el service worker', e);
       }

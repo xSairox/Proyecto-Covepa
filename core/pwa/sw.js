@@ -1,6 +1,7 @@
 /* Service worker de COVEPA Mantenciones.
    Objetivo: que el técnico abra la app y registre una mantención sin señal (HU-05).
-   - Pantallas de terreno: red primero (4 s) y, si falla, la última copia guardada.
+   - Pantallas de terreno: red primero (4 s) y, si falla, la última copia guardada. La app las guarda por adelantado
+     (mensaje "paginas") para que abrir la app sin señal no dependa de haberlas visitado antes.
    - /static/: se sirve desde el caché y se actualiza en segundo plano.
    - Nunca guarda /api/, el login, la administración ni respuestas con redirección.
    __VERSION__ se reemplaza en cada despliegue y renueva el caché. */
@@ -35,6 +36,18 @@ async function guardarRecursos(urls) {
       const r = await fetch(u, { credentials: 'same-origin' });
       if (await respuestaCacheable(r)) await cache.put(u, r);
     } catch (e) { /* sin red: se intentará en otra visita */ }
+  }));
+}
+
+// Guarda pantallas completas (no solo sus archivos) para poder abrirlas sin señal aunque no se hayan visitado antes.
+// Solo se guardan respuestas directas: una redirección (p. ej. "/") o un 403 no se guardan.
+async function guardarPaginas(rutas) {
+  const cache = await caches.open(CACHE_PAGINAS);
+  await Promise.all(rutas.map(async (ruta) => {
+    try {
+      const r = await fetch(ruta, { credentials: 'same-origin' });
+      if (await respuestaCacheable(r)) await cache.put(ruta, r);
+    } catch (e) { /* sin red: se intentará en la próxima visita */ }
   }));
 }
 
@@ -82,7 +95,10 @@ async function navegacion(peticion) {
     return r;
   } catch (e) {
     // Sin señal o red muy lenta: la última copia de esa pantalla, o la página de aviso
-    const copia = (await cache.match(url.pathname)) || (await cache.match('/offline/'));
+    // "/" es la dirección con la que se abre la app instalada y siempre redirige: nunca queda guardada tal cual,
+    // así que sin señal se entrega la pantalla de inicio del técnico.
+    const inicio = url.pathname === '/' ? await cache.match('/mantenciones/inicio/') : null;
+    const copia = (await cache.match(url.pathname)) || inicio || (await cache.match('/offline/'));
     if (copia) return copia;
     return new Response('Sin conexión', { status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
   }
@@ -121,6 +137,8 @@ self.addEventListener('message', (evento) => {
   if (datos.tipo === 'cachear' && Array.isArray(datos.urls)) {
     const rutas = datos.urls.filter((u) => typeof u === 'string' && u.startsWith('/static/'));
     evento.waitUntil(guardarRecursos(rutas));
+  } else if (datos.tipo === 'paginas' && Array.isArray(datos.urls)) {
+    evento.waitUntil(guardarPaginas(datos.urls.filter((u) => typeof u === 'string' && esGuardable(u))));
   } else if (datos.tipo === 'limpiar') {
     // Cierre de sesión: se borran las pantallas guardadas (equipos compartidos). Los estáticos no tienen datos.
     evento.waitUntil(caches.delete(CACHE_PAGINAS));

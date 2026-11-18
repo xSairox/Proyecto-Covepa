@@ -37,6 +37,16 @@ class PWAEstatica(unittest.TestCase):
         self.assertIn("/offline/", sw)
         self.assertIn("__VERSION__", sw)
 
+    def test_abrir_la_app_sin_senal_no_cae_en_la_pagina_de_aviso(self):
+        """La app instalada abre "/" (que redirige) y el técnico puede no haber visitado antes "Registrar mantención"."""
+        sw = _leer("core/pwa/sw.js")
+        self.assertRegex(sw, r"url\.pathname === '/'.*cache\.match\('/mantenciones/inicio/'\)")
+        self.assertIn("datos.tipo === 'paginas'", sw)
+        app = _leer("static/js/app.js")
+        self.assertIn("tipo: 'paginas'", app)
+        self.assertIn("'/mantenciones/registrar/'", app)
+        self.assertIn("controllerchange", app)
+
     def test_la_app_registra_el_service_worker_en_la_raiz(self):
         self.assertRegex(_leer("static/js/app.js"), r"serviceWorker\.register\('/sw\.js', \{ scope: '/' \}\)")
 

@@ -96,7 +96,7 @@ Documentación: `docs/er/` (diagrama entidad-relación), `docs/diccionario_datos
 La interfaz es una *Progressive Web App*: se instala en el celular y se abre a pantalla completa, como una app nativa.
 
 - **Instalable:** `manifest.webmanifest` (`display: standalone`, íconos 192/512 y *maskable*) y etiquetas para iPhone en `templates/base.html`. En Android/Chrome aparece el botón **Instalar la app** en *Mi perfil* (`static/js/instalar.js`); en iPhone se indican los pasos de *Compartir → Añadir a pantalla de inicio*.
-- **Sin conexión:** `core/pwa/sw.js` (service worker, servido desde `/sw.js`) guarda las pantallas de terreno y los archivos estáticos.
+- **Sin conexión:** `core/pwa/sw.js` (service worker, servido desde `/sw.js`) guarda los archivos estáticos y las pantallas de terreno (*Mis mantenciones* y *Registrar mantención*); la app las guarda por adelantado al abrir el inicio con señal, así que el técnico debe abrir la app con señal al menos una vez (y de nuevo después de cada actualización).
 - **Cola de envío:** los formularios se guardan en IndexedDB (`static/js/db.js`, `sync.js`) y se envían al volver la señal, sin duplicarse (identificador UUID).
 - Requiere HTTPS (Vercel lo entrega) o `localhost`.
 
