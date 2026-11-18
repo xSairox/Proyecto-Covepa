@@ -21,11 +21,17 @@
     <label for="sel-plantilla">Formulario</label>
     <select class="campo" id="sel-plantilla" required></select>
   </div>
+  <div class="vacio" id="sin-formularios" hidden><strong>Este equipo no tiene formularios publicados</strong>La jefatura debe publicar un formulario para la categoría <span id="categoria-sin-formulario"></span> en <em>Más → Plantillas de formulario</em>.</div>
   <p class="ayuda" id="info-automatica"></p>
   <div id="campos-dinamicos" class="formulario"></div>
   <ul class="errorlist" id="errores-form" role="alert" hidden></ul>
   <button class="boton boton--bloque" type="submit" id="boton-guardar">Guardar mantención</button>
 </form>
-<div class="vacio" id="sin-datos" hidden><strong>Todavía no hay datos en este dispositivo</strong>Conéctate a internet una vez para descargar tus equipos y formularios.</div>
+<div class="vacio" id="sin-datos" hidden>
+  <strong id="sin-datos-titulo">Todavía no hay datos en este dispositivo</strong>
+  <span id="sin-datos-texto">Conéctate a internet una vez para descargar tus equipos y formularios.</span>
+  <div class="acciones" style="justify-content:center;margin-top:16px"><button class="boton boton--chico" type="button" id="reintentar" hidden>Reintentar</button></div>
+</div>
+<div class="vacio" id="sin-equipos" hidden><strong>No tienes equipos para registrar</strong>Tu usuario no tiene equipos disponibles. Pide a la jefatura que revise tu sucursal (técnico interno) o los equipos que te asignó (técnico externo).</div>
 {% endblock %}
 {% block scripts %}<script src="{% static 'js/db.js' %}" defer></script><script src="{% static 'js/sync.js' %}" defer></script><script src="{% static 'js/registrar.js' %}" defer></script>{% endblock %}

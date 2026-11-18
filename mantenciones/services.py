@@ -281,6 +281,8 @@ def construir_paquete(usuario) -> dict:
     for p in plantillas:
         version = repo.obtener_version(p.pk, p.version_actual)
         if version is None:
+            # PostgreSQL dice que está publicada pero MongoDB no tiene esa versión: el técnico no la verá
+            logger.warning("Plantilla %s (v%s) sin documento en MongoDB: no se incluye en el paquete", p.pk, p.version_actual)
             continue
         plantillas_json[str(p.pk)] = {
             "id": p.pk,

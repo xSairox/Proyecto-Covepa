@@ -93,6 +93,6 @@ class Command(BaseCommand):
     @staticmethod
     def _plantilla(nombre, categoria, campos):
         plantilla, _ = Plantilla.objects.get_or_create(nombre=nombre, categoria=categoria)
-        if plantilla.version_actual == 0:
-            plantilla.publicar_version(campos)
+        if plantilla.version_actual == 0 or plantilla.version() is None:
+            plantilla.publicar_version(campos)  # también repara una plantilla cuya versión falta en MongoDB
         return plantilla

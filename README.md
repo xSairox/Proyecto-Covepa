@@ -63,6 +63,7 @@ Copia *Cloud name*, *API key* y *API secret* del panel. Las fotos y los videos s
 **Si el despliegue falla:**
 - `DJANGO_SETTINGS_FAILED` / `No module named 'django'`: Vercel instala desde `pyproject.toml` (tiene prioridad sobre `requirements.txt`). Por eso las dependencias están declaradas en ambos archivos; si agregas una librería, agrégala en los dos (la prueba `core/tests/test_dependencias.py` avisa si se desalinean).
 - `"tool.vercel.entrypoint" ... no matching module file`: Vercel no encuentra `config/wsgi.py`. El repositorio debe tener `manage.py` y `config/` en la raíz (o indica la carpeta en *Settings → General → Root Directory*).
+- «Registrar mantención» sin equipos o sin formularios: el técnico interno necesita una sucursal con equipos activos; el externo, equipos asignados; y cada categoría, una plantilla publicada (la versión vive en MongoDB). `python manage.py diagnostico_registro <correo>` indica cuál falta.
 - `Faltan variables de entorno obligatorias`: define `SECRET_KEY` y `DATABASE_URL` (y el resto de `.env.example`) en *Settings → Environment Variables* y vuelve a desplegar.
 
 ## 3. Pruebas
@@ -71,6 +72,7 @@ Copia *Cloud name*, *API key* y *API secret* del panel. Las fotos y los videos s
 pytest core/tests                  # sin base de datos; corren en cualquier equipo con Python
 python manage.py test pruebas      # casos CP01–CP09, tickets, permisos, auditoría, PWA
 python manage.py verificar_integridad   # compara PostgreSQL y MongoDB (ids de formularios)
+python manage.py diagnostico_registro tecnico@covepa.test   # explica por qué a un técnico le sale vacío «Registrar mantención»
 ```
 
 El detalle de cada caso, la prueba de carga (Locust) y la colección de Postman están en `docs/PROTOCOLO_DE_PRUEBAS.md` y `tests/`.

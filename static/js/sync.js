@@ -102,8 +102,6 @@
       if (!r.ok) return null;
       const paquete = await r.json();
       await db().guardar('meta', { clave: 'paquete', valor: paquete });
-      // Deja guardadas las pantallas de terreno para abrirlas sin señal
-      ['/mantenciones/inicio/', '/mantenciones/registrar/'].forEach((u) => fetch(u, { credentials: 'same-origin' }).catch(() => {}));
       document.dispatchEvent(new CustomEvent('covepa:paquete'));
       return paquete;
     } catch (e) {

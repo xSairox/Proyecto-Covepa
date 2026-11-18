@@ -113,6 +113,7 @@
     sesionForm = null;
     const equipo = paquete.equipos.find((e) => String(e.id) === selEquipo.value);
     const plantilla = paquete.plantillas[selPlantilla.value];
+    $('boton-guardar').hidden = !equipo || !plantilla;
     if (!equipo || !plantilla) { $('info-automatica').textContent = ''; return; }
     sesionForm = { equipo, plantilla, inicio: new Date(), lectores: {}, archivos: {} };
     plantilla.campos.forEach((c) => contenedor.append(crearCampo(c, sesionForm)));
@@ -206,9 +207,10 @@
     const equipo = paquete.equipos.find((e) => String(e.id) === selEquipo.value);
     const ids = equipo ? equipo.plantillas : [];
     $('grupo-plantilla').hidden = ids.length <= 1;
-    if (equipo && !ids.length) {
-      selPlantilla.append(el('option', { value: '', texto: 'Este equipo no tiene formularios publicados' }));
-    }
+    // Sin formularios publicados se explica el motivo (antes el aviso quedaba dentro de un menú oculto y la pantalla parecía vacía)
+    const faltaFormulario = Boolean(equipo) && ids.length === 0;
+    $('sin-formularios').hidden = !faltaFormulario;
+    if (faltaFormulario) $('categoria-sin-formulario').textContent = `«${equipo.categoria}»`;
     ids.forEach((id) => selPlantilla.append(el('option', { value: String(id), texto: paquete.plantillas[id].nombre })));
     const plan = planDeLaUrl();
     if (plan && equipo && plan.equipo_id === equipo.id && ids.includes(plan.plantilla_id)) selPlantilla.value = String(plan.plantilla_id);
@@ -218,7 +220,18 @@
   async function iniciar() {
     // Con señal se descargan los datos al día (equipos o plantillas nuevas); sin señal, los guardados.
     paquete = (navigator.onLine && (await COVEPA.sync.refrescarPaquete())) || (await COVEPA.sync.paqueteLocal());
-    if (!paquete) { $('sin-datos').hidden = false; return; }
+    if (!paquete) {
+      $('sin-datos').hidden = false;
+      if (navigator.onLine) {
+        // Con señal pero sin datos: el servidor no respondió bien (no es falta de conexión)
+        $('sin-datos-titulo').textContent = 'No pudimos descargar tus datos';
+        $('sin-datos-texto').textContent = 'El servidor no respondió. Inténtalo de nuevo; si sigue igual, avisa a la jefatura.';
+        $('reintentar').hidden = false;
+        $('reintentar').addEventListener('click', () => location.reload());
+      }
+      return;
+    }
+    if (!paquete.equipos.length) { $('sin-equipos').hidden = false; return; }
     form.hidden = false;
     // append() nativo NO acepta arreglos (los convierte a texto): hay que esparcirlos con "...".
     selEquipo.append(el('option', { value: '', texto: 'Elige un equipo' }),
